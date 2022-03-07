@@ -1,0 +1,7 @@
+---
+- name: Install lss
+  hosts: localhost
+  tasks:
+    - name: Install lss
+      include_role:
+        name: adrianjuhl.lss

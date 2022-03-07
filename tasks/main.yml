@@ -1,0 +1,27 @@
+---
+# tasks file for adrianjuhl.lss
+
+- name: Setting facts
+  set_fact:
+    install_dir: "/usr/local/bin/lss.d"
+
+- name: Create lss install directory
+  ansible.builtin.file:
+    dest: "{{ install_dir }}"
+    state: directory
+    mode: "0755"
+  become: true
+
+- name: Copy lss.sh into place
+  copy:
+    src: lss.sh
+    dest: "{{ install_dir }}/lss.sh"
+    mode: "0755"
+  become: true
+
+- name: Configure a link for lss
+  ansible.builtin.file:
+    src: "{{ install_dir }}/lss.sh"
+    dest: "/usr/local/bin/lss"
+    state: link
+  become: true
