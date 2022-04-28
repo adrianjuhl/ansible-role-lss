@@ -78,9 +78,19 @@ get_secret()
     msg "Error: [in get_secret()] Missing required parameter: secret-name-path"
     abort_script
   fi
+  stat ${LSS_SECRETS_DIRECTORY}/${secret_name_path} >/dev/null 2>&1
+  if [ "$?" -gt 0 ]; then
+    msg "Error: No such secret ${secret_name_path}"
+    abort_script
+  fi
   local machine_local_master_password=$(get_machine_local_master_password)
   local encrypted_secret=$(cat ${LSS_SECRETS_DIRECTORY}/${secret_name_path})
-  local plaintext_secret=$(jasypt-decrypt verbose=false input="${encrypted_secret}" password="${machine_local_master_password}")
+  local plaintext_secret=$(jasypt-decrypt verbose=false input="${encrypted_secret}" password="${machine_local_master_password}" 2>/dev/null)
+  local plaintext_secret_bytes_count=$(echo -n "${plaintext_secret}" | wc --bytes)
+  if [ "${plaintext_secret_bytes_count}" -eq 0 ]; then
+    msg "Error: Could not decrypt secret. Ensure the correct machine local master password was used to unlock lss."
+    abort_script
+  fi
   echo -n "${plaintext_secret}"
 }
 
